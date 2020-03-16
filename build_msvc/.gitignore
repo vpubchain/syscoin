@@ -1,0 +1,12 @@
+# Build directories
+Debug/*
+Release/*
+.vs
+packages/*
+*/Obj
+*/Debug
+*/Release
+*/x64
+*/Win32
+libsyscoin_qt/QtGeneratedFiles/*
+test_syscoin-qt/QtGeneratedFiles/*
