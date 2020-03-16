@@ -267,10 +267,10 @@ public:
         consensus.vchSYSXERC20Manager = ParseHex("443d9a14fb6ba2A45465bEC3767186f404Ccea25");
         consensus.vchTokenFreezeMethod = ParseHex("aabab1db49e504b5156edf3f99042aeecb9607a08f392589571cd49743aaba8d");
         consensus.nBridgeStartBlock = 1000;
-        pchMessageStart[0] = 0xce;
-        pchMessageStart[1] = 0xe2;
-        pchMessageStart[2] = 0xca;
-        pchMessageStart[3] = 0xfe;
+        pchMessageStart[0] = 0x1a;
+        pchMessageStart[1] = 0x2b;
+        pchMessageStart[2] = 0x3c;
+        pchMessageStart[3] = 0x4d;
         nDefaultPort = 19069;
         nPruneAfterHeight = 1000;
         m_assumed_blockchain_size = 30;
