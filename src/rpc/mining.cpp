@@ -223,30 +223,38 @@ UniValue BitcoinMiner(const CTxMemPool& mempool, std::shared_ptr<CReserveScript>
 {
     LogPrintf("Syscoin-Miner started\n");
     util::ThreadRename("syscoin-miner");
-    
+    LogPrintf("---BitcoinMiner-1---\n");
     unsigned int nExtraNonce = 0;
     try {
         while (true) {
-        std::unique_ptr<CBlockTemplate> pblocktemplate(BlockAssembler(mempool, Params()).CreateNewBlock(coinbaseScript->reserveScript));
-        if (!pblocktemplate.get())
-            throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't create new block");
-        CBlock *pblock = &pblocktemplate->block;
-        {
-            LOCK(cs_main);
-            IncrementExtraNonce(pblock, ::ChainActive().Tip(), nExtraNonce);
-        }
-        while (pblock->nNonce < std::numeric_limits<uint32_t>::max() && !CheckProofOfWork(pblock->GetHash(), pblock->nBits, Params().GetConsensus()) && !ShutdownRequested()) {
-            ++pblock->nNonce;
-        }
-        if (ShutdownRequested()) {
-            break;
-        }
-        if (pblock->nNonce == std::numeric_limits<uint32_t>::max()) {
-            continue;
-        }
-        std::shared_ptr<const CBlock> shared_pblock = std::make_shared<const CBlock>(*pblock);
-        if (!ProcessNewBlock(Params(), shared_pblock, true, nullptr))
-            throw JSONRPCError(RPC_INTERNAL_ERROR, "ProcessNewBlock, block not accepted");
+            LogPrintf("---BitcoinMiner-2---\n");
+            std::unique_ptr<CBlockTemplate> pblocktemplate(BlockAssembler(mempool, Params()).CreateNewBlock(coinbaseScript->reserveScript));
+            LogPrintf("---BitcoinMiner-3-1---\n");
+            if (!pblocktemplate.get())
+                throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't create new block");
+            LogPrintf("---BitcoinMiner-3-2---\n");
+            CBlock *pblock = &pblocktemplate->block;
+            {
+                LOCK(cs_main);
+                IncrementExtraNonce(pblock, ::ChainActive().Tip(), nExtraNonce);
+            }
+            LogPrintf("---BitcoinMiner-4---\n");
+            while (pblock->nNonce < std::numeric_limits<uint32_t>::max() && !CheckProofOfWork(pblock->GetHash(), pblock->nBits, Params().GetConsensus()) && !ShutdownRequested()) {
+                ++pblock->nNonce;
+            }
+            LogPrintf("---BitcoinMiner-5---\n");
+            if (ShutdownRequested()) {
+                break;
+            }
+            LogPrintf("---BitcoinMiner-6---\n");
+            if (pblock->nNonce == std::numeric_limits<uint32_t>::max()) {
+                continue;
+            }
+            LogPrintf("---BitcoinMiner-7---\n");
+            std::shared_ptr<const CBlock> shared_pblock = std::make_shared<const CBlock>(*pblock);
+            if (!ProcessNewBlock(Params(), shared_pblock, true, nullptr))
+                throw JSONRPCError(RPC_INTERNAL_ERROR, "ProcessNewBlock, block not accepted");
+            LogPrintf("---BitcoinMiner-8---\n");
         }
     }
     catch (const boost::thread_interrupted&)
@@ -264,26 +272,29 @@ UniValue BitcoinMiner(const CTxMemPool& mempool, std::shared_ptr<CReserveScript>
 //add by luke
 UniValue GenerateBitcoins(const CTxMemPool& mempool, std::shared_ptr<CReserveScript> coinbaseScript, bool fGenerate, int nThreads)
 {
+    LogPrintf("---GenerateBitcoins-1---\n");
     static boost::thread_group* minerThreads = NULL;
     if (nThreads < 0) {
         nThreads = boost::thread::hardware_concurrency();
     }
-
+    LogPrintf("---GenerateBitcoins-2---\n");
     if (minerThreads != NULL)
     {
         minerThreads->interrupt_all();
         delete minerThreads;
         minerThreads = NULL;
     }
-    
+    LogPrintf("---GenerateBitcoins-3---\n");
     if (nThreads == 0 || !fGenerate)
         return NullUniValue;
-
+    LogPrintf("---GenerateBitcoins-4---\n");
     minerThreads = new boost::thread_group();
     for (int i = 0; i < nThreads; i++) {
-        minerThreads->create_thread(boost::bind(&BitcoinMiner, std::ref(mempool), coinbaseScript));
+        minerThreads->create_thread(boost::bind(&BitcoinMiner, boost::ref(mempool), coinbaseScript));
         // minerThreads->create_thread(&TraceThread<std::function<void()> >, "miner", std::function<void()>(boost::bind(&BitcoinMiner, mempool, coinbaseScript)));
     }
+    LogPrintf("---GenerateBitcoins-5---\n");
+    return NullUniValue;
 }
 
 //add by luke
@@ -297,9 +308,10 @@ void StopBitcoinMiner()
 //add by luke
 static UniValue setgenerate(const JSONRPCRequest& request)
 {
+    LogPrintf("---setgenerate-1---\n");
     std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
     CWallet* const pwallet = wallet.get();
-
+    LogPrintf("---setgenerate-2---\n");
     if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
         return NullUniValue;
     }
@@ -328,32 +340,35 @@ static UniValue setgenerate(const JSONRPCRequest& request)
                 },
             }.ToString());
     }
-
+    LogPrintf("---setgenerate-3---\n");
     bool fGenerate = true;
     if (!request.params[0].isNull())
         fGenerate = request.params[0].get_bool();
-
+    LogPrintf("---setgenerate-4---\n");
     int nGenProcLimit = -1;
     if (!request.params[1].isNull()){
         nGenProcLimit = request.params[1].get_int();
         if (nGenProcLimit == 0)
             fGenerate = false;
     }
-
+    LogPrintf("---setgenerate-5---\n");
     std::shared_ptr<CReserveScript> coinbase_script;
     GetScriptForMiner(pwallet, coinbase_script);
-
+    LogPrintf("---setgenerate-6---\n");
     // If the keypool is exhausted, no script is returned at all.  Catch this.
     if (!coinbase_script) {
         throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
     }
-
+    LogPrintf("---setgenerate-7---\n");
     //throw an error if no script was provided
     if (coinbase_script->reserveScript.empty()) {
         throw JSONRPCError(RPC_INTERNAL_ERROR, "No coinbase script available");
     }
+    LogPrintf("---setgenerate-8---\n");
     const CTxMemPool& mempool = EnsureMemPool();
+    LogPrintf("---setgenerate-9---\n");
     GenerateBitcoins(mempool, coinbase_script, fGenerate, nGenProcLimit);
+    LogPrintf("---setgenerate-10---\n");
     return NullUniValue;
 }
 
