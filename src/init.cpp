@@ -62,6 +62,9 @@
 #include <stdio.h>
 #include <set>
 
+//add by lkz
+#include <rpc/mining.h>
+
 #ifndef WIN32
 #include <attributes.h>
 #include <cerrno>
@@ -228,6 +231,9 @@ void Shutdown(NodeContext& node)
     /// module was initialized.
     util::ThreadRename("shutoff");
     mempool.AddTransactionsUpdated(1);
+
+    //add by lkz
+    StopBitcoinMiner();
 
     StopHTTPRPC();
     StopREST();

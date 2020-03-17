@@ -42,6 +42,11 @@
 #include <governanceclasses.h>
 #include <masternodepayments.h>
 #include <masternodesync.h>
+
+//add by luke
+#include <wallet/rpcwallet.h>
+#include <wallet/wallet.h>
+
 /**
  * Return average network hashes per second based on the last 'lookup' blocks,
  * or from the last difficulty change if 'lookup' is nonpositive.
@@ -198,10 +203,110 @@ static UniValue generatetodescriptor(const JSONRPCRequest& request)
 }
 
 //add by luke
+void GetScriptForMiner (CWallet* pwallet, std::shared_ptr<CReserveScript>& script)
+{
+    auto rKey = std::make_shared<ReserveDestination> (pwallet, OutputType::LEGACY);
+    CTxDestination dest;
+    if (!rKey->GetReservedDestination (dest, false))
+        return;
+
+    script = rKey;
+    CPubKey pubkey;
+    PKHash *pkhash = boost::get<PKHash>(&dest);
+    LegacyScriptPubKeyMan* spk_man = pwallet->GetLegacyScriptPubKeyMan();
+    if (spk_man && pkhash && spk_man->GetPubKey(CKeyID(*pkhash), pubkey))
+        script->reserveScript = CScript () << ToByteVector (pubkey) << OP_CHECKSIG;
+}
+
+//add by luke
+UniValue BitcoinMiner(const CTxMemPool& mempool, std::shared_ptr<CReserveScript> coinbaseScript)
+{
+    LogPrintf("Syscoin-Miner started\n");
+    util::ThreadRename("syscoin-miner");
+    
+    unsigned int nExtraNonce = 0;
+    try {
+        while (true) {
+        std::unique_ptr<CBlockTemplate> pblocktemplate(BlockAssembler(mempool, Params()).CreateNewBlock(coinbaseScript->reserveScript));
+        if (!pblocktemplate.get())
+            throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't create new block");
+        CBlock *pblock = &pblocktemplate->block;
+        {
+            LOCK(cs_main);
+            IncrementExtraNonce(pblock, ::ChainActive().Tip(), nExtraNonce);
+        }
+        while (pblock->nNonce < std::numeric_limits<uint32_t>::max() && !CheckProofOfWork(pblock->GetHash(), pblock->nBits, Params().GetConsensus()) && !ShutdownRequested()) {
+            ++pblock->nNonce;
+        }
+        if (ShutdownRequested()) {
+            break;
+        }
+        if (pblock->nNonce == std::numeric_limits<uint32_t>::max()) {
+            continue;
+        }
+        std::shared_ptr<const CBlock> shared_pblock = std::make_shared<const CBlock>(*pblock);
+        if (!ProcessNewBlock(Params(), shared_pblock, true, nullptr))
+            throw JSONRPCError(RPC_INTERNAL_ERROR, "ProcessNewBlock, block not accepted");
+        }
+    }
+    catch (const boost::thread_interrupted&)
+    {
+        LogPrintf("BitcoinMiner terminated\n");
+        throw;
+    }
+    catch (const std::runtime_error &e)
+    {
+        LogPrintf("BitcoinMiner runtime error: %s\n", e.what());
+        return NullUniValue;
+    }
+}
+
+//add by luke
+UniValue GenerateBitcoins(const CTxMemPool& mempool, std::shared_ptr<CReserveScript> coinbaseScript, bool fGenerate, int nThreads)
+{
+    static boost::thread_group* minerThreads = NULL;
+    if (nThreads < 0) {
+        nThreads = boost::thread::hardware_concurrency();
+    }
+
+    if (minerThreads != NULL)
+    {
+        minerThreads->interrupt_all();
+        delete minerThreads;
+        minerThreads = NULL;
+    }
+    
+    if (nThreads == 0 || !fGenerate)
+        return NullUniValue;
+
+    minerThreads = new boost::thread_group();
+    for (int i = 0; i < nThreads; i++) {
+        minerThreads->create_thread(boost::bind(&BitcoinMiner, std::ref(mempool), coinbaseScript));
+        // minerThreads->create_thread(&TraceThread<std::function<void()> >, "miner", std::function<void()>(boost::bind(&BitcoinMiner, mempool, coinbaseScript)));
+    }
+}
+
+//add by luke
+void StopBitcoinMiner()
+{   
+    const CTxMemPool& mempool = EnsureMemPool();
+    GenerateBitcoins(mempool, NULL, false, 0);
+    return;
+}
+
+//add by luke
 static UniValue setgenerate(const JSONRPCRequest& request)
 {
-    RPCHelpMan{"setgenerate",
-                "setgenerate generate ( genproclimit )\n"
+    std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
+    CWallet* const pwallet = wallet.get();
+
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    if (request.fHelp || request.params.size() < 2 || request.params.size() > 3) {
+         throw std::runtime_error(
+            RPCHelpMan{"setgenerate",
                 "\nSet 'generate' true or false to turn generation on or off.\n"
                 "Generation is limited to 'genproclimit' processors, -1 is unlimited.\n"
                 "See the getgenerate call for the current setting.\n" ,
@@ -209,21 +314,46 @@ static UniValue setgenerate(const JSONRPCRequest& request)
                     {"generate", RPCArg::Type::BOOL, RPCArg::Optional::NO, "Set to true to turn on generation, off to turn off.\n"},
                     {"genproclimit", RPCArg::Type::NUM, RPCArg::Optional::OMITTED_NAMED_ARG, "Set the processor limit for when generation is on. Can be -1 for unlimited.\n"},
                 },
-                RPCResult{ 
-                    ""
+                RPCResults{ 
                 },
                 RPCExamples{
                     "\nSet the generation on with a limit of one processor\n"
-            + HelpExampleCli("setgenerate", "true 1")
-            + "\nCheck the setting\n"
-            + HelpExampleRpc("getgenerate", "") 
-            + "\nTurn off generation\n"
-            + HelpExampleRpc("setgenerate", "false") 
-            + "\nUsing json rpc\n"
-            + HelpExampleRpc("setgenerate", "true, 1")
+                    + HelpExampleCli("setgenerate", "true 1")
+                    + "\nCheck the setting\n"
+                    + HelpExampleRpc("getgenerate", "") 
+                    + "\nTurn off generation\n"
+                    + HelpExampleRpc("setgenerate", "false") 
+                    + "\nUsing json rpc\n"
+                    + HelpExampleRpc("setgenerate", "true, 1")
                 },
-            }.Check(request);
-            
+            }.ToString());
+    }
+
+    bool fGenerate = true;
+    if (!request.params[0].isNull())
+        fGenerate = request.params[0].get_bool();
+
+    int nGenProcLimit = -1;
+    if (!request.params[1].isNull()){
+        nGenProcLimit = request.params[1].get_int();
+        if (nGenProcLimit == 0)
+            fGenerate = false;
+    }
+
+    std::shared_ptr<CReserveScript> coinbase_script;
+    GetScriptForMiner(pwallet, coinbase_script);
+
+    // If the keypool is exhausted, no script is returned at all.  Catch this.
+    if (!coinbase_script) {
+        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+    }
+
+    //throw an error if no script was provided
+    if (coinbase_script->reserveScript.empty()) {
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "No coinbase script available");
+    }
+    const CTxMemPool& mempool = EnsureMemPool();
+    GenerateBitcoins(mempool, coinbase_script, fGenerate, nGenProcLimit);
     return NullUniValue;
 }
 
