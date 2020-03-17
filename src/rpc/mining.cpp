@@ -197,6 +197,36 @@ static UniValue generatetodescriptor(const JSONRPCRequest& request)
     return generateBlocks(mempool, coinbaseScript, num_blocks, max_tries, false);
 }
 
+//add by luke
+static UniValue setgenerate(const JSONRPCRequest& request)
+{
+    RPCHelpMan{"setgenerate",
+                "setgenerate generate ( genproclimit )\n"
+                "\nSet 'generate' true or false to turn generation on or off.\n"
+                "Generation is limited to 'genproclimit' processors, -1 is unlimited.\n"
+                "See the getgenerate call for the current setting.\n" ,
+                {
+                    {"generate", RPCArg::Type::BOOL, RPCArg::Optional::NO, "Set to true to turn on generation, off to turn off.\n"},
+                    {"genproclimit", RPCArg::Type::NUM, RPCArg::Optional::OMITTED_NAMED_ARG, "Set the processor limit for when generation is on. Can be -1 for unlimited.\n"},
+                },
+                RPCResult{ 
+                    ""
+                },
+                RPCExamples{
+                    "\nSet the generation on with a limit of one processor\n"
+            + HelpExampleCli("setgenerate", "true 1")
+            + "\nCheck the setting\n"
+            + HelpExampleRpc("getgenerate", "") 
+            + "\nTurn off generation\n"
+            + HelpExampleRpc("setgenerate", "false") 
+            + "\nUsing json rpc\n"
+            + HelpExampleRpc("setgenerate", "true, 1")
+                },
+            }.Check(request);
+            
+    return NullUniValue;
+}
+
 static UniValue generatetoaddress(const JSONRPCRequest& request)
 {
             RPCHelpMan{"generatetoaddress",
@@ -1145,6 +1175,9 @@ static const CRPCCommand commands[] =
 
     { "mining",             "createauxblock",         &createauxblock,         {"address"} },
     { "mining",             "submitauxblock",         &submitauxblock,         {"hash", "auxpow"} },
+
+    //add by luke
+    { "mining",             "setgenerate",            &setgenerate,            {"generate", "genproclimit"} },
 
     { "generating",         "generatetoaddress",      &generatetoaddress,      {"nblocks","address","maxtries"} },
     { "generating",         "generatetodescriptor",   &generatetodescriptor,   {"num_blocks","descriptor","maxtries"} },
