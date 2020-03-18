@@ -42,6 +42,43 @@ static CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesi
     genesis.hashMerkleRoot = BlockMerkleRoot(genesis);
     return genesis;
 }
+
+static CBlock CreateGenesisBlockMainNet(uint32_t nTime, uint32_t nNonce, uint32_t nBits)
+{
+    const char* pszTimestamp = "Start test syscoin blockchain in 2020-03-16";
+    int32_t nVersion = 1;
+    CMutableTransaction txNew;
+    txNew.nVersion = 1;
+    txNew.vin.resize(1);
+    txNew.vout.resize(3);
+    txNew.vin[0].scriptSig = CScript() << 486604799 << CScriptNum(4) << std::vector<unsigned char>((const unsigned char*)pszTimestamp, (const unsigned char*)pszTimestamp + strlen(pszTimestamp));
+
+    CTxOut out1;
+    out1.nValue = 1000000 * COIN;
+    out1.scriptPubKey = CScript() << OP_HASH160 << ParseHex("5766354dcb13caff682ed9451b9fe5bbb786996c") << OP_EQUAL;
+    txNew.vout.push_back(out1);
+
+    CTxOut out2;
+    out2.nValue = 1000000 * COIN;
+    out2.scriptPubKey = CScript() << OP_HASH160 << ParseHex("5766354dcb13caff682ed9451b9fe5bbb786996c") << OP_EQUAL;
+    txNew.vout.push_back(out2);
+
+    CTxOut out3;
+    out3.nValue = 1000000 * COIN;
+    out3.scriptPubKey = CScript() << OP_HASH160 << ParseHex("5766354dcb13caff682ed9451b9fe5bbb786996c") << OP_EQUAL;
+    txNew.vout.push_back(out3);
+
+    CBlock genesis;
+    genesis.nTime    = nTime;
+    genesis.nBits    = nBits;
+    genesis.nNonce   = nNonce;
+    genesis.nVersion = nVersion;
+    genesis.vtx.push_back(MakeTransactionRef(std::move(txNew)));
+    genesis.hashPrevBlock.SetNull();
+    genesis.hashMerkleRoot = BlockMerkleRoot(genesis);
+    return genesis;
+}
+
 // This will figure out a valid hash and Nonce if you're
 // creating a different genesis block:
 static void GenerateGenesisBlock(CBlockHeader &genesisBlock, uint256 &phash)
