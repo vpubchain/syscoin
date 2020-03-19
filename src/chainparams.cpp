@@ -202,9 +202,9 @@ public:
         // genesis = CreateGenesisBlockMainNet(1584370800, 149470, 0x1e0fffff);
 
         // print mainNet genesis block hash
-        uint256 hash;
-        CBlockHeader genesisHeader = genesis.GetBlockHeader();
-        GenerateGenesisBlock(genesisHeader, hash);
+        // uint256 hash;
+        // CBlockHeader genesisHeader = genesis.GetBlockHeader();
+        // GenerateGenesisBlock(genesisHeader, hash);
 
         consensus.hashGenesisBlock = genesis.GetHash();
         assert(consensus.hashGenesisBlock == uint256S("0x00000f8e6fec4ad5253c553720594f22708c4fe21600d71e9e9ad280ceb460b0"));
@@ -244,7 +244,7 @@ public:
                 // { 280000, uint256S("0x651375427865345d37a090ca561c1ed135c6b8dafa591a59f2abf1eb26dfd538")},
                 // { 292956, uint256S("0xae6dca1b9dd7adcb8a11c8ea7f9fe72bb47ff6e4156e1d172e2a8612b18a319d")},
                 
-                { 0, uint256S("0x00000ca893173fcd132a32d6d9b77ebc0745e276f600526358d1c260fe547e3e")},
+                { 0, uint256S("0x00000f8e6fec4ad5253c553720594f22708c4fe21600d71e9e9ad280ceb460b0")},
                 
             }
         };
