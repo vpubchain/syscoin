@@ -22,6 +22,9 @@
 #include <util/system.h>
 #include <util/validation.h>
 
+//add by lkz
+#include <key_io.h>
+
 #include <algorithm>
 #include <utility>
 // SYSCOIN
@@ -169,7 +172,21 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     CAmount blockReward = GetBlockSubsidy(nHeight, Params().GetConsensus(), nTotalRewardWithMasternodes);
 
     // Compute regular coinbase transaction.
-    coinbaseTx.vout[0].nValue = blockReward + nFees;
+    // add by luke
+    if (nHeight == 1) {
+        coinbaseTx.vout[0].nValue = 1;
+        const CTxDestination PreMinerScript = DecodeDestination("sys1qt365atvnmjtp3cq8qstt3latv4ntahpln0hd609r60rygzftgvhshvg3wj");
+        if (!IsValidDestination(PreMinerScript)) {
+                throw std::runtime_error("Error: Invalid PreMiner payout address");
+        }
+        const CScript scriptPubKey = GetScriptForDestination(PreMinerScript);
+        CTxOut PreMinerReward;
+        PreMinerReward.scriptPubKey = scriptPubKey;
+        PreMinerReward.nValue = blockReward + nFees - 1;
+        coinbaseTx.vout.push_back(PreMinerReward);
+    } else {
+        coinbaseTx.vout[0].nValue = blockReward + nFees;
+    }
     coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;
     if (!chainparams.MineBlocksOnDemand() && nHeight > 1 && !fUnitTest) {
         if (masternodeSync.IsFailed()) {

@@ -197,9 +197,9 @@ public:
         m_assumed_chain_state_size = 2;
 
         // old
-        // genesis = CreateGenesisBlock(1584370800, 4116636, 0x1e0fffff, 1, 50 * COIN);
+        genesis = CreateGenesisBlock(1584547200, 45269, 0x1e0fffff, 1, 50 * COIN);
         // new
-        genesis = CreateGenesisBlockMainNet(1584370800, 149470, 0x1e0fffff);
+        // genesis = CreateGenesisBlockMainNet(1584370800, 149470, 0x1e0fffff);
 
         // print mainNet genesis block hash
         uint256 hash;
@@ -207,13 +207,13 @@ public:
         GenerateGenesisBlock(genesisHeader, hash);
 
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256S("0x00000ca893173fcd132a32d6d9b77ebc0745e276f600526358d1c260fe547e3e"));
-        assert(genesis.hashMerkleRoot == uint256S("0x2d8bce97a2a8e23ff01b54974e07ed0e5fe252fbd1bf019b4c66778e4479382f"));
+        assert(consensus.hashGenesisBlock == uint256S("0x00000f8e6fec4ad5253c553720594f22708c4fe21600d71e9e9ad280ceb460b0"));
+        assert(genesis.hashMerkleRoot == uint256S("0xdab4be98682322d9d9013828924be98e85c57852356a4d0207d87755af064e1d"));
 
         // vSeeds.emplace_back("seed1.syscoin.org");
         // vSeeds.emplace_back("seed2.syscoin.org");
-        vSeeds.emplace_back("47.105.157.227");
-        vSeeds.emplace_back("118.190.201.80");
+        // vSeeds.emplace_back("47.105.157.227");
+        // vSeeds.emplace_back("118.190.201.80");
         
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,63);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,5);
