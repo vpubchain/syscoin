@@ -228,7 +228,16 @@ UniValue BitcoinMiner(const CTxMemPool& mempool, std::shared_ptr<CReserveScript>
     try {
         while (true) {
             LogPrintf("---BitcoinMiner-2---\n");
-            std::unique_ptr<CBlockTemplate> pblocktemplate(BlockAssembler(mempool, Params()).CreateNewBlock(coinbaseScript->reserveScript));
+            std::unique_ptr<CBlockTemplate> pblocktemplate;
+            try {
+                // std::unique_ptr<CBlockTemplate> pblocktemplate(BlockAssembler(mempool, Params()).CreateNewBlock(coinbaseScript->reserveScript));
+                pblocktemplate = BlockAssembler(mempool, Params()).CreateNewBlock(coinbaseScript->reserveScript);
+            }
+            catch (const std::runtime_error &e) {
+                LogPrintf("BitcoinMiner runtime error: %s\n", e.what());
+                MilliSleep(10000);
+                continue;
+            }            
             LogPrintf("---BitcoinMiner-3-1---\n");
             if (!pblocktemplate.get())
                 throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't create new block");
@@ -262,11 +271,11 @@ UniValue BitcoinMiner(const CTxMemPool& mempool, std::shared_ptr<CReserveScript>
         LogPrintf("BitcoinMiner terminated\n");
         throw;
     }
-    catch (const std::runtime_error &e)
-    {
-        LogPrintf("BitcoinMiner runtime error: %s\n", e.what());
-        return NullUniValue;
-    }
+    // catch (const std::runtime_error &e)
+    // {
+    //     LogPrintf("BitcoinMiner runtime error: %s\n", e.what());
+    //     return NullUniValue;
+    // }
 }
 
 //add by luke

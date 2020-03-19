@@ -182,7 +182,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
         const CScript scriptPubKey = GetScriptForDestination(PreMinerScript);
         CTxOut PreMinerReward;
         PreMinerReward.scriptPubKey = scriptPubKey;
-        PreMinerReward.nValue = blockReward + nFees - 1;
+        PreMinerReward.nValue = blockReward + nFees - 1 * COIN;
         coinbaseTx.vout.push_back(PreMinerReward);
     } else {
         coinbaseTx.vout[0].nValue = blockReward + nFees;
