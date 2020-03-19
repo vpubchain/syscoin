@@ -55,17 +55,17 @@ static CBlock CreateGenesisBlockMainNet(uint32_t nTime, uint32_t nNonce, uint32_
 
     CTxOut out1;
     out1.nValue = 1000000 * COIN;
-    out1.scriptPubKey = CScript() << OP_HASH160 << ParseHex("5766354dcb13caff682ed9451b9fe5bbb786996c") << OP_EQUAL;
+    out1.scriptPubKey = CScript() << OP_HASH160 << ParseHex("5c754ead93dc9618e0070416b8ffab6566bedc3f9beedd3ca3d3c644092b432f") << OP_EQUAL;
     txNew.vout.push_back(out1);
 
     CTxOut out2;
     out2.nValue = 1000000 * COIN;
-    out2.scriptPubKey = CScript() << OP_HASH160 << ParseHex("5766354dcb13caff682ed9451b9fe5bbb786996c") << OP_EQUAL;
+    out2.scriptPubKey = CScript() << OP_HASH160 << ParseHex("61822c1e85995fc6f839463be8a55391dfdff58d06b76cbc1b87435eb98b57e1") << OP_EQUAL;
     txNew.vout.push_back(out2);
 
     CTxOut out3;
     out3.nValue = 1000000 * COIN;
-    out3.scriptPubKey = CScript() << OP_HASH160 << ParseHex("5766354dcb13caff682ed9451b9fe5bbb786996c") << OP_EQUAL;
+    out3.scriptPubKey = CScript() << OP_HASH160 << ParseHex("c5d23423863ac079c0e2a009eae5795774bc6736ef0b0c6ed51ad9e5fc5959aa") << OP_EQUAL;
     txNew.vout.push_back(out3);
 
     CBlock genesis;
@@ -196,16 +196,19 @@ public:
         m_assumed_blockchain_size = 30;
         m_assumed_chain_state_size = 2;
 
-        genesis = CreateGenesisBlock(1584370800, 4116636, 0x1e0fffff, 1, 50 * COIN);
-        
+        // old
+        // genesis = CreateGenesisBlock(1584370800, 4116636, 0x1e0fffff, 1, 50 * COIN);
+        // new
+        genesis = CreateGenesisBlockMainNet(1584370800, 149470, 0x1e0fffff);
+
         // print mainNet genesis block hash
-        // uint256 hash;
-        // CBlockHeader genesisHeader = genesis.GetBlockHeader();
-        // GenerateGenesisBlock(genesisHeader, hash);
+        uint256 hash;
+        CBlockHeader genesisHeader = genesis.GetBlockHeader();
+        GenerateGenesisBlock(genesisHeader, hash);
 
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256S("0x000004e3b842222bcd2b8b85fe53449e27f8d9d6cc12802c0bc2b03d8a5a6e5a"));
-        assert(genesis.hashMerkleRoot == uint256S("0xdab4be98682322d9d9013828924be98e85c57852356a4d0207d87755af064e1d"));
+        assert(consensus.hashGenesisBlock == uint256S("0x00000ca893173fcd132a32d6d9b77ebc0745e276f600526358d1c260fe547e3e"));
+        assert(genesis.hashMerkleRoot == uint256S("0x2d8bce97a2a8e23ff01b54974e07ed0e5fe252fbd1bf019b4c66778e4479382f"));
 
         // vSeeds.emplace_back("seed1.syscoin.org");
         // vSeeds.emplace_back("seed2.syscoin.org");
@@ -241,7 +244,7 @@ public:
                 // { 280000, uint256S("0x651375427865345d37a090ca561c1ed135c6b8dafa591a59f2abf1eb26dfd538")},
                 // { 292956, uint256S("0xae6dca1b9dd7adcb8a11c8ea7f9fe72bb47ff6e4156e1d172e2a8612b18a319d")},
                 
-                { 0, uint256S("0x000004e3b842222bcd2b8b85fe53449e27f8d9d6cc12802c0bc2b03d8a5a6e5a")},
+                { 0, uint256S("0x00000ca893173fcd132a32d6d9b77ebc0745e276f600526358d1c260fe547e3e")},
                 
             }
         };
