@@ -1196,11 +1196,6 @@ bool GetTransaction(const uint256& hash, CTransactionRef& txOut, const Consensus
     return false;
 }
 
-
-
-
-
-
 //////////////////////////////////////////////////////////////////////////////
 //
 // CBlock and CBlockIndex
@@ -1372,53 +1367,52 @@ CAmount GetBlockSubsidy(unsigned int nHeight, const Consensus::Params& consensus
     if (nHeight == 0)
         return 50*COIN;
     if (nHeight == 1)
-    if (!bRegtest && nHeight == 1)
-    {
+    if (!bRegtest && nHeight == 1) {
         // SYSCOIN 4 snapshot
         nTotalRewardWithMasternodes = 1000001 * COIN;
         return nTotalRewardWithMasternodes;
     }
 
-    CAmount nSubsidy = 38.5 * COIN;
+    CAmount nSubsidy = 66.6 * COIN;
     int reductions = nHeight / consensusParams.nSubsidyHalvingInterval;
     if (reductions >= 50) {
         nTotalRewardWithMasternodes = 0;
         return nTotalRewardWithMasternodes;
     }
     // Subsidy reduced every 525600 blocks which will occur approximately every year.
-    // yearly decline of production by 5% per year, projected ~888M coins max by year 2067+.
+    // yearly decline of production by half per year, projected ~888M coins max by year 2067+.
     for (int i = 0; i < reductions; i++) {
-        nSubsidy -= nSubsidy / 20;
+        nSubsidy -= nSubsidy / 2;
     }
     // Reduce the block reward of miners (allowing budget/superblocks)
-    const CAmount &nSuperblockPart = (nSubsidy*0.1);
+    // const CAmount &nSuperblockPart = (nSubsidy*0.1);
+    const CAmount &nSuperblockPart = 0; //add by lkz
 
     if (fSuperblockPartOnly)
         return nSuperblockPart;
     nSubsidy -= nSuperblockPart;
     nTotalRewardWithMasternodes = nSubsidy;
     if (fMasternodePartOnly) {
-        nSubsidy *= 0.75;
-        if (nHeight > 0 && nStartHeight > 0) {
-            unsigned int nDifferenceInBlocks = 0;
-            if (nHeight > nStartHeight)
-                nDifferenceInBlocks = (nHeight - nStartHeight);
+        nSubsidy *= 0.19;   // modify by lkz   
+        // if (nHeight > 0 && nStartHeight > 0) {
+        //     unsigned int nDifferenceInBlocks = 0;
+        //     if (nHeight > nStartHeight)
+        //         nDifferenceInBlocks = (nHeight - nStartHeight);
                 
-             double fSubsidyAdjustmentPercentage = 0;
-             if(nDifferenceInBlocks >= consensusParams.nSeniorityHeight2)
-                fSubsidyAdjustmentPercentage = consensusParams.nSeniorityLevel2;
-             else if(nDifferenceInBlocks >= consensusParams.nSeniorityHeight1)
-                fSubsidyAdjustmentPercentage = consensusParams.nSeniorityLevel1;
+        //      double fSubsidyAdjustmentPercentage = 0;
+        //      if(nDifferenceInBlocks >= consensusParams.nSeniorityHeight2)
+        //         fSubsidyAdjustmentPercentage = consensusParams.nSeniorityLevel2;
+        //      else if(nDifferenceInBlocks >= consensusParams.nSeniorityHeight1)
+        //         fSubsidyAdjustmentPercentage = consensusParams.nSeniorityLevel1;
                 
-            if(fSubsidyAdjustmentPercentage > 0){
-                const CAmount &nChange = nSubsidy*fSubsidyAdjustmentPercentage;
-                nSubsidy += nChange;
-                nTotalRewardWithMasternodes += nChange;
-            }
-        }
+        //     if(fSubsidyAdjustmentPercentage > 0){
+        //         const CAmount &nChange = nSubsidy*fSubsidyAdjustmentPercentage;
+        //         nSubsidy += nChange;
+        //         nTotalRewardWithMasternodes += nChange;
+        //     }
+        // }
     }
     return nSubsidy;
-
 }
 
 CoinsViews::CoinsViews(

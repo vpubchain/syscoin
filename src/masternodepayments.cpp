@@ -234,7 +234,7 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
 {
     // make sure it's not filled yet
     txoutMasternodeRet = CTxOut();
-	const CAmount &nHalfFee = fees / 2;
+	// const CAmount &nHalfFee = fees / 2;
     CScript payee;
 	int nStartHeightBlock = 0;
     if(!GetBlockPayee(nBlockHeight, payee, nStartHeightBlock)) {
@@ -250,12 +250,64 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
         payee = GetScriptForDestination(PKHash(mnInfo.pubKeyCollateralAddress));
 		nStartHeightBlock = 0;
     }
-
-	// miner takes 25% of the reward and half fees
-	txNew.vout[0].nValue = (blockReward*0.25);
-	
-	txNew.vout[0].nValue += nHalfFee;
-	// masternode takes 75% of reward, add/remove some reward depending on seniority and half fees.
+	// txNew.vout[0].nValue = (blockReward*0.25);
+	// txNew.vout[0].nValue += nHalfFee;
+    
+    // add by lkz
+    CAmount nHalfFee = fees;
+    int HalvingInterval = Params().GetConsensus().nSubsidyHalvingInterval;
+    int FundEnd = nBlockHeight / HalvingInterval;
+    CAmount TwoFundReward = 0;
+    if (FundEnd < 3 ) {
+        // miner takes 0.01% of the reward and half fees
+        nHalfFee = fees / 5;
+        TwoFundReward = (FundEnd == 0) ? (1380*10000*COIN)/HalvingInterval : (725*10000*COIN)/HalvingInterval;
+        //miner fund
+        txNew.vout[0].nValue = blockReward * 0.01 + nHalfFee;
+        //performance fund
+        const CTxDestination PerformanceScript = DecodeDestination("sys1qchfrggux8tq8ns8z5qy74ete2a6tceekau9scmk4rtv7tlzetx4qlf9z9f");
+        if (!IsValidDestination(PerformanceScript)) 
+            throw std::runtime_error("Error: Invalid PreMiner payout address");
+        const CScript PerformancePubKey = GetScriptForDestination(PerformanceScript);
+        CTxOut PerformanceReward;
+        PerformanceReward.scriptPubKey = PerformancePubKey;
+        PerformanceReward.nValue = blockReward * 0.8 +  nHalfFee;
+        txNew.vout.push_back(PerformanceReward);
+        //community fund
+        const CTxDestination CommunityScript = DecodeDestination("sys1qt365atvnmjtp3cq8qstt3latv4ntahpln0hd609r60rygzftgvhshvg3wj");
+        if (!IsValidDestination(CommunityScript)) 
+            throw std::runtime_error("Error: Invalid PreMiner payout address");
+        const CScript CommunityPubKey = GetScriptForDestination(CommunityScript);
+        CTxOut CommunityReward;
+        CommunityReward.scriptPubKey = CommunityPubKey;
+        CommunityReward.nValue = TwoFundReward * 0.8 +  nHalfFee;
+        txNew.vout.push_back(CommunityReward);
+        //technology fund
+        const CTxDestination TechnologyScript = DecodeDestination("sys1qvxpzc859n90ud7pegca73f2nj80alavdq6mke0qmsap4awvt2lsszx3vpf");
+        if (!IsValidDestination(TechnologyScript)) 
+            throw std::runtime_error("Error: Invalid PreMiner payout address");
+        const CScript TechnologyPubKey = GetScriptForDestination(TechnologyScript);
+        CTxOut TechnologyReward;
+        TechnologyReward.scriptPubKey = TechnologyPubKey;
+        TechnologyReward.nValue = TwoFundReward * 0.2 +  nHalfFee;
+        txNew.vout.push_back(TechnologyReward);
+    } else {
+        // miner takes 0.01% of the reward and half fees
+        nHalfFee = fees / 3;
+        //miner fund
+        txNew.vout[0].nValue = blockReward * 0.01 + nHalfFee;
+        //performance fund
+        const CTxDestination PerformanceScript = DecodeDestination("sys1qchfrggux8tq8ns8z5qy74ete2a6tceekau9scmk4rtv7tlzetx4qlf9z9f");
+        if (!IsValidDestination(PerformanceScript)) 
+            throw std::runtime_error("Error: Invalid PreMiner payout address");
+        const CScript PerformancePubKey = GetScriptForDestination(PerformanceScript);
+        CTxOut PerformanceReward;
+        PerformanceReward.scriptPubKey = PerformancePubKey;
+        PerformanceReward.nValue = blockReward * 0.8 +  nHalfFee;
+        txNew.vout.push_back(PerformanceReward);
+    }
+    
+	// masternode takes 0.19% of reward, add/remove some reward depending on seniority and half fees.
 	CAmount nTotalReward;
 	blockReward = GetBlockSubsidy(nBlockHeight, Params().GetConsensus(), nTotalReward, false, true, nStartHeightBlock);
 

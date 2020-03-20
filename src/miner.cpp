@@ -185,8 +185,58 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
         PreMinerReward.nValue = blockReward + nFees - 1 * COIN;
         coinbaseTx.vout.push_back(PreMinerReward);
     } else {
-        coinbaseTx.vout[0].nValue = blockReward + nFees;
+        CAmount nHalfFee = nFees;
+        CAmount TwoFundReward = 0;
+        int HalvingInterval = Params().GetConsensus().nSubsidyHalvingInterval;
+        int FundEnd = nHeight / HalvingInterval;
+        if (FundEnd < 3) {
+            nHalfFee = nFees / 4;
+            TwoFundReward = (FundEnd == 0) ? (1380*10000*COIN)/HalvingInterval : (725*10000*COIN)/HalvingInterval;
+            //miner fund
+            coinbaseTx.vout[0].nValue = blockReward * 0.2 + nHalfFee;
+            //performance fund
+            const CTxDestination PerformanceScript = DecodeDestination("sys1qchfrggux8tq8ns8z5qy74ete2a6tceekau9scmk4rtv7tlzetx4qlf9z9f");
+            if (!IsValidDestination(PerformanceScript)) 
+                throw std::runtime_error("Error: Invalid PreMiner payout address");
+            const CScript PerformancePubKey = GetScriptForDestination(PerformanceScript);
+            CTxOut PerformanceReward;
+            PerformanceReward.scriptPubKey = PerformancePubKey;
+            PerformanceReward.nValue = blockReward * 0.8 +  nHalfFee;
+            coinbaseTx.vout.push_back(PerformanceReward);
+            //community fund
+            const CTxDestination CommunityScript = DecodeDestination("sys1qt365atvnmjtp3cq8qstt3latv4ntahpln0hd609r60rygzftgvhshvg3wj");
+            if (!IsValidDestination(CommunityScript)) 
+                throw std::runtime_error("Error: Invalid PreMiner payout address");
+            const CScript CommunityPubKey = GetScriptForDestination(CommunityScript);
+            CTxOut CommunityReward;
+            CommunityReward.scriptPubKey = CommunityPubKey;
+            CommunityReward.nValue = TwoFundReward * 0.8 +  nHalfFee;
+            coinbaseTx.vout.push_back(CommunityReward);
+            //technology fund
+            const CTxDestination TechnologyScript = DecodeDestination("sys1qvxpzc859n90ud7pegca73f2nj80alavdq6mke0qmsap4awvt2lsszx3vpf");
+            if (!IsValidDestination(TechnologyScript)) 
+                throw std::runtime_error("Error: Invalid PreMiner payout address");
+            const CScript TechnologyPubKey = GetScriptForDestination(TechnologyScript);
+            CTxOut TechnologyReward;
+            TechnologyReward.scriptPubKey = TechnologyPubKey;
+            TechnologyReward.nValue = TwoFundReward * 0.2 +  nHalfFee;
+            coinbaseTx.vout.push_back(TechnologyReward);
+        } else {
+            nHalfFee = nFees / 2;
+            //miner fund
+            coinbaseTx.vout[0].nValue = blockReward * 0.2 + nHalfFee;
+            //performance fund
+            const CTxDestination PerformanceScript = DecodeDestination("sys1qchfrggux8tq8ns8z5qy74ete2a6tceekau9scmk4rtv7tlzetx4qlf9z9f");
+            if (!IsValidDestination(PerformanceScript)) 
+                throw std::runtime_error("Error: Invalid PreMiner payout address");
+            const CScript PerformancePubKey = GetScriptForDestination(PerformanceScript);
+            CTxOut PerformanceReward;
+            PerformanceReward.scriptPubKey = PerformancePubKey;
+            PerformanceReward.nValue = blockReward * 0.8 +  nHalfFee;
+            coinbaseTx.vout.push_back(PerformanceReward);
+        }      
     }
+
     coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;
     if (!chainparams.MineBlocksOnDemand() && nHeight > 1 && !fUnitTest) {
         if (masternodeSync.IsFailed()) {
