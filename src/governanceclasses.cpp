@@ -1070,7 +1070,6 @@ bool CSuperblock::IsValid(const CTransaction& txNew, int nBlockHeight, const CAm
             return false;
         }
     }
-
     return true;
 }
 

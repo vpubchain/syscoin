@@ -48,7 +48,6 @@ bool IsBlockValueValid(const CBlock& block, int nBlockHeight, const CAmount &blo
     // all we know is predefined budget cycle and window
 
     // superblocks started
-
 	CAmount nSuperblockMaxValue = blockRewardWithFee + CSuperblock::GetPaymentsLimit(nBlockHeight);
 	bool isSuperblockMaxValueMet = (block.vtx[0]->GetValueOut() <= nSuperblockMaxValue);
 
@@ -81,7 +80,6 @@ bool IsBlockValueValid(const CBlock& block, int nBlockHeight, const CAmount &blo
     }
 
     // we are synced, let's try to check as much data as we can
-
     if(sporkManager.IsSporkActive(SPORK_9_SUPERBLOCKS_ENABLED)) {
         if(CSuperblockManager::IsSuperblockTriggered(nBlockHeight)) {
             if(CSuperblockManager::IsValid(*block.vtx[0], nBlockHeight, blockRewardWithFee)) {
@@ -134,11 +132,8 @@ bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight,  const CAmou
     // we are still using budgets, but we have no data about them anymore,
     // we can only check masternode payments
 
-  
-
     // superblocks started
     // SEE IF THIS IS A VALID SUPERBLOCK
-
     if(sporkManager.IsSporkActive(SPORK_9_SUPERBLOCKS_ENABLED)) {
         if(CSuperblockManager::IsSuperblockTriggered(nBlockHeight)) {
             if(CSuperblockManager::IsValid(txNew, nBlockHeight, blockReward)) {
@@ -156,7 +151,7 @@ bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight,  const CAmou
         // should NOT allow superblocks at all, when superblocks are disabled
         LogPrint(BCLog::GOBJECT, "IsBlockPayeeValid -- Superblocks are disabled, no superblocks allowed\n");
     }
-
+  
     // IF THIS ISN'T A SUPERBLOCK OR SUPERBLOCK IS INVALID, IT SHOULD PAY A MASTERNODE DIRECTLY
     if(mnpayments.IsTransactionValid(txNew, nBlockHeight, fee, nTotalRewardWithMasternodes)) {
         LogPrint(BCLog::MNPAYMENT, "IsBlockPayeeValid -- Valid masternode payment at height %d: %s\n", nBlockHeight, txNew.ToString());
@@ -617,15 +612,18 @@ bool CMasternodeBlockPayees::HasPayeeWithVotes(const CScript& payeeIn, int nVote
 bool CMasternodeBlockPayees::IsTransactionValid(const CTransaction& txNew, const int64_t &nHeight, const CAmount& fee, CAmount& nTotalRewardWithMasternodes) const
 {
     LOCK(cs_vecPayees);
-	const CAmount& nHalfFee = fee / 2;
+
+    // modify by lkz
+    // const CAmount& nHalfFee = fee / 2;
+    int nVout = txNew.vout.size();
+	const CAmount& nHalfFee = fee / nVout;
+
     int nMaxSignatures = 0;
     std::string strPayeesPossible = "";
 
 	const CChainParams& chainparams = Params();
 
     //require at least MNPAYMENTS_SIGNATURES_REQUIRED signatures
-
-
     for (const auto& payee : vecPayees) {
         if (payee.GetVoteCount() >= nMaxSignatures) {
             nMaxSignatures = payee.GetVoteCount();

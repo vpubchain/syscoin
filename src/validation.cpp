@@ -1392,6 +1392,15 @@ CAmount GetBlockSubsidy(unsigned int nHeight, const Consensus::Params& consensus
         return nSuperblockPart;
     nSubsidy -= nSuperblockPart;
     nTotalRewardWithMasternodes = nSubsidy;
+
+    //add by luke
+    CAmount TwoFundReward = 0;
+    int HalvingInterval = consensusParams.nSubsidyHalvingInterval;
+    if(reductions < 3) {
+        TwoFundReward = (reductions == 0) ? (1380*10000*COIN)/HalvingInterval : (725*10000*COIN)/HalvingInterval;
+        nTotalRewardWithMasternodes += TwoFundReward;
+    }
+
     if (fMasternodePartOnly) {
         nSubsidy *= 0.19;   // modify by lkz   
         // if (nHeight > 0 && nStartHeight > 0) {
@@ -2337,6 +2346,52 @@ bool CChainState::ConnectBlock(const CBlock& block, BlockValidationState& state,
         return state.Invalid(BlockValidationResult::BLOCK_CONSENSUS, "bad-cb-amount");
     }
     // END SYSCOIN
+
+    //checkout fund payment is correct ? add by lkz
+    CTransaction txNew = *block.vtx[0];
+    int nBlockHeight = pindex->nHeight;
+    if (nBlockHeight > 1) {
+        int HalvingInterval = Params().GetConsensus().nSubsidyHalvingInterval;
+        int FundEnd = nBlockHeight / HalvingInterval;
+        CAmount nHalfFee = 0;
+        CAmount TwoFundReward = 0;
+        CAmount nBlockReward = GetBlockSubsidy(pindex->nHeight, chainparams.GetConsensus(), nTotalRewardWithMasternodes);
+        int nVout = txNew.vout.size();
+        if (FundEnd < 3) {
+            nHalfFee = nFees / nVout;
+            TwoFundReward = (FundEnd == 0) ? (1380*10000*COIN)/HalvingInterval : (725*10000*COIN)/HalvingInterval;
+            //performance fund
+            const CTxDestination PerformanceScript = DecodeDestination("sys1qchfrggux8tq8ns8z5qy74ete2a6tceekau9scmk4rtv7tlzetx4qlf9z9f");
+            const CScript PerformancePubKey = GetScriptForDestination(PerformanceScript);
+            if (txNew.vout[1].scriptPubKey != PerformancePubKey || txNew.vout[1].nValue != nBlockReward*0.8 + nHalfFee) {
+                LogPrintf("IsBlockPayeeValid -- Valid performance fund payment at height %d: %s\n", nBlockHeight, txNew.ToString());
+                return false;
+            }
+            //community fund
+            const CTxDestination CommunityScript = DecodeDestination("sys1qt365atvnmjtp3cq8qstt3latv4ntahpln0hd609r60rygzftgvhshvg3wj");
+            const CScript CommunityPubKey = GetScriptForDestination(CommunityScript);
+            if (txNew.vout[2].scriptPubKey != CommunityPubKey || txNew.vout[2].nValue != TwoFundReward*0.8 + nHalfFee) {
+                LogPrintf("IsBlockPayeeValid -- Valid community fund payment at height %d: %s\n", nBlockHeight, txNew.ToString());
+                return false;
+            }
+            //technology fund
+            const CTxDestination TechnologyScript = DecodeDestination("sys1qvxpzc859n90ud7pegca73f2nj80alavdq6mke0qmsap4awvt2lsszx3vpf");
+            const CScript TechnologyPubKey = GetScriptForDestination(TechnologyScript);
+            if (txNew.vout[3].scriptPubKey != TechnologyPubKey || txNew.vout[3].nValue != TwoFundReward*0.2 + nHalfFee ) {
+                LogPrintf("IsBlockPayeeValid -- Valid technology fund payment at height %d: %s\n", nBlockHeight, txNew.ToString());
+                return false;
+            }
+        } else {
+            nHalfFee = nFees / nVout;
+            //performance fund
+            const CTxDestination PerformanceScript = DecodeDestination("sys1qchfrggux8tq8ns8z5qy74ete2a6tceekau9scmk4rtv7tlzetx4qlf9z9f");
+            const CScript PerformancePubKey = GetScriptForDestination(PerformanceScript);
+            if (txNew.vout[1].scriptPubKey != PerformancePubKey || txNew.vout[1].nValue != nBlockReward*0.8 + nHalfFee) {
+                LogPrintf("IsBlockPayeeValid -- Valid performance fund payment at height %d: %s\n", nBlockHeight, txNew.ToString());
+                return false;
+            }
+        } 
+    }
 
     int64_t nTime4 = GetTimeMicros(); nTimeVerify += nTime4 - nTime2;
     LogPrint(BCLog::BENCH, "    - Verify %u txins: %.2fms (%.3fms/txin) [%.2fs (%.2fms/blk)]\n", nInputs - 1, MILLI * (nTime4 - nTime2), nInputs <= 1 ? 0 : MILLI * (nTime4 - nTime2) / (nInputs-1), nTimeVerify * MICRO, nTimeVerify * MILLI / nBlocksTotal);
