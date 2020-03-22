@@ -2359,10 +2359,19 @@ bool CChainState::ConnectBlock(const CBlock& block, BlockValidationState& state,
         int nVout = txNew.vout.size();
         if (FundEnd < 3) {
             nHalfFee = nFees / nVout;
+            LogPrintf("nFees:%d, nVout:%d, nHalfFee:%d\n", nFees, nVout, nHalfFee);
             TwoFundReward = (FundEnd == 0) ? (1380*10000*COIN)/HalvingInterval : (725*10000*COIN)/HalvingInterval;
             //performance fund
             const CTxDestination PerformanceScript = DecodeDestination("sys1qchfrggux8tq8ns8z5qy74ete2a6tceekau9scmk4rtv7tlzetx4qlf9z9f");
             const CScript PerformancePubKey = GetScriptForDestination(PerformanceScript);
+            
+            CTxDestination voutAddr1;
+            ExtractDestination(txNew.vout[1].scriptPubKey, voutAddr1);
+            // std::string voutAddr1 = ExtractDestination(txNew.vout[1].scriptPubKey);
+            LogPrintf("voutAddr1=%s\n", EncodeDestination(voutAddr1));
+            
+            // LogPrintf("txNew.vout[1].scriptPubKey=%s, PerformancePubKey=%s\n", txNew.vout[1].scriptPubKey, PerformancePubKey);
+            LogPrintf("txNew.vout[1].nValue=%d, nBlockReward*0.8 + nHalfFee=%s\n", txNew.vout[1].nValue, nBlockReward*0.8 + nHalfFee);
             if (txNew.vout[1].scriptPubKey != PerformancePubKey || txNew.vout[1].nValue != nBlockReward*0.8 + nHalfFee) {
                 LogPrintf("IsBlockPayeeValid -- Valid performance fund payment at height %d: %s\n", nBlockHeight, txNew.ToString());
                 return false;
