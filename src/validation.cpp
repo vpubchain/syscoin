@@ -2367,11 +2367,8 @@ bool CChainState::ConnectBlock(const CBlock& block, BlockValidationState& state,
             
             CTxDestination voutAddr1;
             ExtractDestination(txNew.vout[1].scriptPubKey, voutAddr1);
-            // std::string voutAddr1 = ExtractDestination(txNew.vout[1].scriptPubKey);
             LogPrintf("voutAddr1=%s\n", EncodeDestination(voutAddr1));
-            
-            // LogPrintf("txNew.vout[1].scriptPubKey=%s, PerformancePubKey=%s\n", txNew.vout[1].scriptPubKey, PerformancePubKey);
-            LogPrintf("txNew.vout[1].nValue=%d, nBlockReward*0.8 + nHalfFee=%s\n", txNew.vout[1].nValue, nBlockReward*0.8 + nHalfFee);
+            LogPrintf("txNew.vout[1].nValue=%d, nBlockReward*0.8 + nHalfFee=%d\n", FormatMoney(txNew.vout[1].nValue), FormatMoney(nBlockReward*0.8 + nHalfFee));
             if (txNew.vout[1].scriptPubKey != PerformancePubKey || txNew.vout[1].nValue != nBlockReward*0.8 + nHalfFee) {
                 LogPrintf("IsBlockPayeeValid -- Valid performance fund payment at height %d: %s\n", nBlockHeight, txNew.ToString());
                 return false;
