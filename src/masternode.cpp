@@ -702,7 +702,7 @@ bool CMasternodeBroadcast::CheckOutpoint(int& nDos)
     }
 
     if (err == COLLATERAL_INVALID_AMOUNT) {
-        LogPrint(BCLog::MN, "CMasternodeBroadcast::CheckOutpoint -- Masternode UTXO should have 100000 SYS, masternode=%s\n", outpoint.ToStringShort());
+        LogPrint(BCLog::MN, "CMasternodeBroadcast::CheckOutpoint -- Masternode UTXO should have 1000 SYS, masternode=%s\n", outpoint.ToStringShort());
         nDos = 33;
         return false;
     }
