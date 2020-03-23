@@ -2364,10 +2364,10 @@ bool CChainState::ConnectBlock(const CBlock& block, BlockValidationState& state,
             //performance fund
             const CTxDestination PerformanceScript = DecodeDestination("sys1qchfrggux8tq8ns8z5qy74ete2a6tceekau9scmk4rtv7tlzetx4qlf9z9f");
             const CScript PerformancePubKey = GetScriptForDestination(PerformanceScript);
-            // CTxDestination voutAddr1;
-            // ExtractDestination(txNew.vout[1].scriptPubKey, voutAddr1);
-            // LogPrintf("voutAddr1=%s\n", EncodeDestination(voutAddr1));
-            // LogPrintf("txNew.vout[1].nValue=%d, nBlockReward*0.8 + nHalfFee=%d\n", FormatMoney(txNew.vout[1].nValue), FormatMoney(nBlockReward*0.8 + nHalfFee));
+            CTxDestination voutAddr1;
+            ExtractDestination(txNew.vout[1].scriptPubKey, voutAddr1);
+            LogPrintf("voutAddr1=%s\n", EncodeDestination(voutAddr1));
+            LogPrintf("txNew.vout[1].nValue=%d, nBlockReward*0.8 + nHalfFee=%d\n", FormatMoney(txNew.vout[1].nValue), FormatMoney(nBlockReward*0.8 + nHalfFee));
             if (txNew.vout[1].scriptPubKey != PerformancePubKey || FormatMoney(txNew.vout[1].nValue) != FormatMoney(nBlockReward*0.8 + nHalfFee)) {
                 LogPrintf("IsBlockPayeeValid -- Valid performance fund payment at height %d: %s\n", nBlockHeight, txNew.ToString());
                 return false;
