@@ -212,8 +212,8 @@ public:
 
         // vSeeds.emplace_back("seed1.syscoin.org");
         // vSeeds.emplace_back("seed2.syscoin.org");
-        // vSeeds.emplace_back("47.105.157.227");
-        // vSeeds.emplace_back("118.190.201.80");
+        vSeeds.emplace_back("47.105.157.227");
+        vSeeds.emplace_back("118.190.201.80");
         
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,63);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,5);
