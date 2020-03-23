@@ -16,6 +16,10 @@
 #include <outputtype.h>
 #include <node/context.h>
 #include <rpc/blockchain.h>
+
+//add by luke
+#include <util/moneystr.h>
+
 // SYSCOIN
 extern void Misbehaving(NodeId nodeid, int howmuch, const std::string& message="") EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 extern std::vector<unsigned char> vchFromString(const std::string &str);
@@ -258,7 +262,8 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
         nHalfFee = fees / 5;
         TwoFundReward = (FundEnd == 0) ? (1380*10000*COIN)/HalvingInterval : (725*10000*COIN)/HalvingInterval;
         //miner fund
-        txNew.vout[0].nValue = blockReward * 0.01 + nHalfFee;
+        std::string strMinerReward = FormatMoney(blockReward * 0.01 + nHalfFee);
+        txNew.vout[0].nValue = std::stoll(strMinerReward);
         //performance fund
         const CTxDestination PerformanceScript = DecodeDestination("sys1qchfrggux8tq8ns8z5qy74ete2a6tceekau9scmk4rtv7tlzetx4qlf9z9f");
         if (!IsValidDestination(PerformanceScript)) 
@@ -266,7 +271,8 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
         const CScript PerformancePubKey = GetScriptForDestination(PerformanceScript);
         CTxOut PerformanceReward;
         PerformanceReward.scriptPubKey = PerformancePubKey;
-        PerformanceReward.nValue = blockReward * 0.8 +  nHalfFee;
+        std::string strPerfomanceReward = FormatMoney(blockReward * 0.8 +  nHalfFee);
+        PerformanceReward.nValue = std::stoll(strPerfomanceReward);
         txNew.vout.push_back(PerformanceReward);
         //community fund
         const CTxDestination CommunityScript = DecodeDestination("sys1qt365atvnmjtp3cq8qstt3latv4ntahpln0hd609r60rygzftgvhshvg3wj");
@@ -275,7 +281,8 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
         const CScript CommunityPubKey = GetScriptForDestination(CommunityScript);
         CTxOut CommunityReward;
         CommunityReward.scriptPubKey = CommunityPubKey;
-        CommunityReward.nValue = TwoFundReward * 0.8 +  nHalfFee;
+        std::string strCommunityReward = FormatMoney(TwoFundReward * 0.8 +  nHalfFee);
+        CommunityReward.nValue = std::stoll(strCommunityReward);
         txNew.vout.push_back(CommunityReward);
         //technology fund
         const CTxDestination TechnologyScript = DecodeDestination("sys1qvxpzc859n90ud7pegca73f2nj80alavdq6mke0qmsap4awvt2lsszx3vpf");
@@ -284,13 +291,14 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
         const CScript TechnologyPubKey = GetScriptForDestination(TechnologyScript);
         CTxOut TechnologyReward;
         TechnologyReward.scriptPubKey = TechnologyPubKey;
-        TechnologyReward.nValue = TwoFundReward * 0.2 +  nHalfFee;
+        std::string strTechnologyReward = FormatMoney(TwoFundReward * 0.2 +  nHalfFee); 
+        TechnologyReward.nValue = std::stoll(strTechnologyReward);
         txNew.vout.push_back(TechnologyReward);
     } else {
         // miner takes 0.01% of the reward and half fees
         nHalfFee = fees / 3;
         //miner fund
-        txNew.vout[0].nValue = blockReward * 0.01 + nHalfFee;
+        // txNew.vout[0].nValue = FormatMoney(blockReward * 0.01 + nHalfFee);
         //performance fund
         const CTxDestination PerformanceScript = DecodeDestination("sys1qchfrggux8tq8ns8z5qy74ete2a6tceekau9scmk4rtv7tlzetx4qlf9z9f");
         if (!IsValidDestination(PerformanceScript)) 
@@ -298,7 +306,8 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
         const CScript PerformancePubKey = GetScriptForDestination(PerformanceScript);
         CTxOut PerformanceReward;
         PerformanceReward.scriptPubKey = PerformancePubKey;
-        PerformanceReward.nValue = blockReward * 0.8 +  nHalfFee;
+        std::string strPerformanceReward = FormatMoney(blockReward * 0.8 +  nHalfFee);
+        PerformanceReward.nValue = std::stoll(strPerformanceReward);
         txNew.vout.push_back(PerformanceReward);
     }
     
@@ -308,7 +317,8 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
 
     // ... and masternode
     txoutMasternodeRet = CTxOut(blockReward, payee);
-	txoutMasternodeRet.nValue += nHalfFee;
+    std::string strHalfFee = FormatMoney(nHalfFee);         //modify by lkz
+	txoutMasternodeRet.nValue += std::stoll(strHalfFee);    //modify by lkz
 
     txNew.vout.push_back(txoutMasternodeRet);
 
