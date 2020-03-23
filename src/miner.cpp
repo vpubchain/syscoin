@@ -193,8 +193,9 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
             nHalfFee = nFees / 4;
             TwoFundReward = (FundEnd == 0) ? (1380*10000*COIN)/HalvingInterval : (725*10000*COIN)/HalvingInterval;
             //miner fund
-            std::string strMinerReward = FormatMoney(blockReward * 0.2 + nHalfFee);
-            coinbaseTx.vout[0].nValue = std::stoll(strMinerReward);
+            // std::string strMinerReward = FormatMoney(blockReward * 0.2 + nHalfFee);
+            // td::stoll(strMinerReward);
+            coinbaseTx.vout[0].nValue = blockReward * 0.2 + nHalfFee;
             //performance fund
             const CTxDestination PerformanceScript = DecodeDestination("sys1qchfrggux8tq8ns8z5qy74ete2a6tceekau9scmk4rtv7tlzetx4qlf9z9f");
             if (!IsValidDestination(PerformanceScript)) 
@@ -202,8 +203,9 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
             const CScript PerformancePubKey = GetScriptForDestination(PerformanceScript);
             CTxOut PerformanceReward;
             PerformanceReward.scriptPubKey = PerformancePubKey;
-            std::string strPerformanceReward = FormatMoney(blockReward * 0.8 +  nHalfFee); 
-            PerformanceReward.nValue = std::stoll(strPerformanceReward);
+            // std::string strPerformanceReward = FormatMoney(blockReward * 0.8 +  nHalfFee); 
+            // std::stoll(strPerformanceReward)
+            PerformanceReward.nValue = blockReward * 0.8 +  nHalfFee;
             coinbaseTx.vout.push_back(PerformanceReward);
             //community fund
             const CTxDestination CommunityScript = DecodeDestination("sys1qt365atvnmjtp3cq8qstt3latv4ntahpln0hd609r60rygzftgvhshvg3wj");
@@ -212,8 +214,9 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
             const CScript CommunityPubKey = GetScriptForDestination(CommunityScript);
             CTxOut CommunityReward;
             CommunityReward.scriptPubKey = CommunityPubKey;
-            std::string strCommunityReward = FormatMoney(TwoFundReward * 0.8 +  nHalfFee);
-            CommunityReward.nValue = std::stoll(strCommunityReward);
+            // std::string strCommunityReward = FormatMoney(TwoFundReward * 0.8 +  nHalfFee);
+            // std::stoll(strCommunityReward);
+            CommunityReward.nValue = TwoFundReward * 0.8 +  nHalfFee;
             coinbaseTx.vout.push_back(CommunityReward);
             //technology fund
             const CTxDestination TechnologyScript = DecodeDestination("sys1qvxpzc859n90ud7pegca73f2nj80alavdq6mke0qmsap4awvt2lsszx3vpf");
@@ -222,8 +225,9 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
             const CScript TechnologyPubKey = GetScriptForDestination(TechnologyScript);
             CTxOut TechnologyReward;
             TechnologyReward.scriptPubKey = TechnologyPubKey;
-            std::string strTechnologyReward = FormatMoney(TwoFundReward * 0.2 +  nHalfFee);
-            TechnologyReward.nValue = std::stoll(strTechnologyReward);
+            // std::string strTechnologyReward = FormatMoney(TwoFundReward * 0.2 +  nHalfFee);
+            // std::stoll(strTechnologyReward);
+            TechnologyReward.nValue = TwoFundReward * 0.2 +  nHalfFee;
             coinbaseTx.vout.push_back(TechnologyReward);
         } else {
             nHalfFee = nFees / 2;
@@ -237,8 +241,9 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
             const CScript PerformancePubKey = GetScriptForDestination(PerformanceScript);
             CTxOut PerformanceReward;
             PerformanceReward.scriptPubKey = PerformancePubKey;
-            std::string strPerformanceReward = FormatMoney(blockReward * 0.8 +  nHalfFee);
-            PerformanceReward.nValue = std::stoll(strPerformanceReward);
+            // std::string strPerformanceReward = FormatMoney(blockReward * 0.8 +  nHalfFee);
+            // std::stoll(strPerformanceReward);
+            PerformanceReward.nValue = blockReward * 0.8 +  nHalfFee;
             coinbaseTx.vout.push_back(PerformanceReward);
         }      
     }
