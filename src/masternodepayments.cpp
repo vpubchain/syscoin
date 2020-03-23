@@ -302,7 +302,8 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
         // miner takes 0.01% of the reward and half fees
         nHalfFee = fees / 3;
         //miner fund
-        // txNew.vout[0].nValue = FormatMoney(blockReward * 0.01 + nHalfFee);
+        // std::string strMinerReward = FormatMoney(blockReward * 0.01 + nHalfFee);
+        txNew.vout[0].nValue = blockReward * 0.01 + nHalfFee;
         //performance fund
         const CTxDestination PerformanceScript = DecodeDestination("sys1qchfrggux8tq8ns8z5qy74ete2a6tceekau9scmk4rtv7tlzetx4qlf9z9f");
         if (!IsValidDestination(PerformanceScript)) 
@@ -310,8 +311,8 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
         const CScript PerformancePubKey = GetScriptForDestination(PerformanceScript);
         CTxOut PerformanceReward;
         PerformanceReward.scriptPubKey = PerformancePubKey;
-        std::string strPerformanceReward = FormatMoney(blockReward * 0.8 +  nHalfFee);
-        std::stoll(strPerformanceReward);
+        // std::string strPerformanceReward = FormatMoney(blockReward * 0.8 +  nHalfFee);
+        // std::stoll(strPerformanceReward);
         PerformanceReward.nValue = blockReward * 0.8 +  nHalfFee;
         txNew.vout.push_back(PerformanceReward);
     }

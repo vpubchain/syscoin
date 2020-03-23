@@ -232,8 +232,9 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
         } else {
             nHalfFee = nFees / 2;
             //miner fund
-            std::string strMinerReward = FormatMoney(blockReward * 0.2 + nHalfFee);
-            coinbaseTx.vout[0].nValue = std::stoll(strMinerReward);
+            // std::string strMinerReward = FormatMoney(blockReward * 0.2 + nHalfFee);
+            // std::stoll(strMinerReward);
+            coinbaseTx.vout[0].nValue = blockReward * 0.2 + nHalfFee;
             //performance fund
             const CTxDestination PerformanceScript = DecodeDestination("sys1qchfrggux8tq8ns8z5qy74ete2a6tceekau9scmk4rtv7tlzetx4qlf9z9f");
             if (!IsValidDestination(PerformanceScript)) 
