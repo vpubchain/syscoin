@@ -378,12 +378,11 @@ bool GetOutpointAndKeysFromOutput(interfaces::Wallet& wallet, const Coin& coin, 
 {
     // wait for reindex and/or import to finish
     if (fImporting || fReindex) return false;
-  
     
     const CScript &pubScript = coin.out.scriptPubKey;
     CTxDestination address;
     ExtractDestination(pubScript, address);
-    
+    // LogPrintf("GetOutpointAndKeysFromOutput-1 address=%s\n", EncodeDestination(address));
     const PKHash *pkhash = boost::get<PKHash>(&address);
     if (!pkhash) {
         LogPrintf("GetOutpointAndKeysFromOutput -- Address does not refer to a key\n");
@@ -431,6 +430,7 @@ bool GetOutpointAndKeysFromOutput(CWallet* const pwallet, const Coin& coin, CPub
     CTxDestination address;
     ExtractDestination(pubScript, address);
     
+    // LogPrintf("GetOutpointAndKeysFromOutput-2 address=%s\n", EncodeDestination(address));
     const PKHash *pkhash = boost::get<PKHash>(&address);
     if (!pkhash) {
         LogPrintf("GetOutpointAndKeysFromOutput -- Address does not refer to a key\n");
