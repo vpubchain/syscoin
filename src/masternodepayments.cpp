@@ -44,7 +44,18 @@ CCriticalSection cs_mapMasternodePaymentVotes;
 
 bool IsBlockValueValid(const CBlock& block, int nBlockHeight, const CAmount &blockReward, const CAmount &nFee, std::string& strErrorRet)
 {
-	const CAmount &blockRewardWithFee = blockReward + nFee;
+	//add by luke
+    LogPrintf("IsBlockValueValid -- txinfo:%s\n", block.vtx[0]->ToString());
+    int HalvingInterval = Params().GetConsensus().nSubsidyHalvingInterval;
+    int FundEnd = nBlockHeight / HalvingInterval;
+    CAmount TwoFundReward = 0;
+    TwoFundReward = (FundEnd == 0) ? (1380*10000*COIN)/HalvingInterval : (725*10000*COIN)/HalvingInterval;
+    CAmount blockRewardWithFee = blockReward + nFee + 0.1 * COIN;
+    if (FundEnd < 3){
+        blockRewardWithFee += TwoFundReward;
+    }
+    // const CAmount &blockRewardWithFee = blockReward + nFee;
+    
     strErrorRet = "";
 	bool isBlockRewardValueMet = (block.vtx[0]->GetValueOut() <= blockRewardWithFee);
 	LogPrint( BCLog::MNPAYMENT, "block.vtx[0].GetValueOut() %lld <= blockReward %lld\n", block.vtx[0]->GetValueOut(), blockRewardWithFee);
@@ -257,6 +268,7 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
     int HalvingInterval = Params().GetConsensus().nSubsidyHalvingInterval;
     int FundEnd = nBlockHeight / HalvingInterval;
     CAmount TwoFundReward = 0;
+    txNew.vout.resize(1);
     if (FundEnd < 3 ) {
         // miner takes 0.01% of the reward and half fees
         nHalfFee = fees / 5;
