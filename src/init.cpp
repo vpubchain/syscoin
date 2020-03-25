@@ -62,7 +62,7 @@
 #include <stdio.h>
 #include <set>
 
-//add by lkz
+//add by luke
 #include <rpc/mining.h>
 
 #ifndef WIN32
@@ -232,7 +232,7 @@ void Shutdown(NodeContext& node)
     util::ThreadRename("shutoff");
     mempool.AddTransactionsUpdated(1);
 
-    //add by lkz
+    //add by luke
     StopBitcoinMiner();
 
     StopHTTPRPC();

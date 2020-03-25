@@ -263,7 +263,7 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
 	// txNew.vout[0].nValue = (blockReward*0.25);
 	// txNew.vout[0].nValue += nHalfFee;
     
-    // add by lkz
+    // add by luke
     CAmount nHalfFee = fees;
     int HalvingInterval = Params().GetConsensus().nSubsidyHalvingInterval;
     int FundEnd = nBlockHeight / HalvingInterval;
@@ -275,57 +275,72 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
         TwoFundReward = (FundEnd == 0) ? (1380*10000*COIN)/HalvingInterval : (725*10000*COIN)/HalvingInterval;
         //miner fund
         std::string strMinerReward = FormatMoney(blockReward * 0.01 + nHalfFee);
-        LogPrintf("std::stoll(strMinerReward)=%ld\n",std::stoll(strMinerReward)) ;
-        txNew.vout[0].nValue = blockReward * 0.01 + nHalfFee;
+        LogPrintf("std::stoll(strMinerReward)=%ld\n",std::stoll(strMinerReward));
+        CAmount MinerCoin = (blockReward * (100 - Params().GetPerformancePercent() - 19)) / 100;
+        txNew.vout[0].nValue = MinerCoin + nHalfFee;
+        // txNew.vout[0].nValue = blockReward * 0.01 + nHalfFee;
+        
         //performance fund
-        const CTxDestination PerformanceScript = DecodeDestination("sys1qchfrggux8tq8ns8z5qy74ete2a6tceekau9scmk4rtv7tlzetx4qlf9z9f");
+        std::string PerformanceAddr = Params().GetPerformanceAddr();
+        const CTxDestination PerformanceScript = DecodeDestination(PerformanceAddr);
+        // const CTxDestination PerformanceScript = DecodeDestination("sys1qchfrggux8tq8ns8z5qy74ete2a6tceekau9scmk4rtv7tlzetx4qlf9z9f");
         if (!IsValidDestination(PerformanceScript)) 
-            throw std::runtime_error("Error: Invalid PreMiner payout address");
+            throw std::runtime_error("Error: Invalid performance payout address");
         const CScript PerformancePubKey = GetScriptForDestination(PerformanceScript);
         CTxOut PerformanceReward;
         PerformanceReward.scriptPubKey = PerformancePubKey;
-        // std::string strPerfomanceReward = FormatMoney(blockReward * 0.8 +  nHalfFee);
-        // std::stoll(strPerfomanceReward);
-        PerformanceReward.nValue = blockReward * 0.8 +  nHalfFee;
+        CAmount PerformanceCoin = (blockReward * Params().GetPerformancePercent()) / 100;
+        PerformanceReward.nValue = PerformanceCoin + nHalfFee;
+        // PerformanceReward.nValue = blockReward * 0.8 +  nHalfFee;
         txNew.vout.push_back(PerformanceReward);
+        
         //community fund
-        const CTxDestination CommunityScript = DecodeDestination("sys1qt365atvnmjtp3cq8qstt3latv4ntahpln0hd609r60rygzftgvhshvg3wj");
+        std::string CommunityAddr = Params().GetCommunityAddr();
+        const CTxDestination CommunityScript = DecodeDestination(CommunityAddr);
+        // const CTxDestination CommunityScript = DecodeDestination("sys1qt365atvnmjtp3cq8qstt3latv4ntahpln0hd609r60rygzftgvhshvg3wj");
         if (!IsValidDestination(CommunityScript)) 
-            throw std::runtime_error("Error: Invalid PreMiner payout address");
+            throw std::runtime_error("Error: Invalid community payout address");
         const CScript CommunityPubKey = GetScriptForDestination(CommunityScript);
         CTxOut CommunityReward;
         CommunityReward.scriptPubKey = CommunityPubKey;
-        // std::string strCommunityReward = FormatMoney(TwoFundReward * 0.8 +  nHalfFee);
-        // std::stoll(strCommunityReward);
-        CommunityReward.nValue = TwoFundReward * 0.8 +  nHalfFee;
+        CAmount CommunityCoin = (TwoFundReward * Params().GetCommunityPercent()) / 100;
+        CommunityReward.nValue = CommunityCoin + nHalfFee;
+        // CommunityReward.nValue = TwoFundReward * 0.8 +  nHalfFee;
         txNew.vout.push_back(CommunityReward);
+        
         //technology fund
-        const CTxDestination TechnologyScript = DecodeDestination("sys1qvxpzc859n90ud7pegca73f2nj80alavdq6mke0qmsap4awvt2lsszx3vpf");
+        std::string TechnologyAddr = Params().GetTechnologyAddr();
+        const CTxDestination TechnologyScript = DecodeDestination(TechnologyAddr);
+        // const CTxDestination TechnologyScript = DecodeDestination("sys1qvxpzc859n90ud7pegca73f2nj80alavdq6mke0qmsap4awvt2lsszx3vpf");
         if (!IsValidDestination(TechnologyScript)) 
-            throw std::runtime_error("Error: Invalid PreMiner payout address");
+            throw std::runtime_error("Error: Invalid technology payout address");
         const CScript TechnologyPubKey = GetScriptForDestination(TechnologyScript);
         CTxOut TechnologyReward;
         TechnologyReward.scriptPubKey = TechnologyPubKey;
-        // std::string strTechnologyReward = FormatMoney(TwoFundReward * 0.2 +  nHalfFee); 
-        // std::stoll(strTechnologyReward);
-        TechnologyReward.nValue = TwoFundReward * 0.2 +  nHalfFee;
+        CAmount TechnologyCoin = (TwoFundReward * Params().GetTechnologyPercent()) / 100;
+        TechnologyReward.nValue = TechnologyCoin + nHalfFee;
+        // TechnologyReward.nValue = TwoFundReward * 0.2 +  nHalfFee;
         txNew.vout.push_back(TechnologyReward);
     } else {
         // miner takes 0.01% of the reward and half fees
         nHalfFee = fees / 3;
         //miner fund
-        // std::string strMinerReward = FormatMoney(blockReward * 0.01 + nHalfFee);
-        txNew.vout[0].nValue = blockReward * 0.01 + nHalfFee;
+        CAmount MinerCoin = (blockReward * (100 - Params().GetPerformancePercent() - 19)) / 100;
+        txNew.vout[0].nValue = MinerCoin + nHalfFee;
+        // txNew.vout[0].nValue = blockReward * 0.01 + nHalfFee;
+        
         //performance fund
-        const CTxDestination PerformanceScript = DecodeDestination("sys1qchfrggux8tq8ns8z5qy74ete2a6tceekau9scmk4rtv7tlzetx4qlf9z9f");
+        std::string PerformanceAddr = Params().GetPerformanceAddr();
+        const CTxDestination PerformanceScript = DecodeDestination(PerformanceAddr);
+        // const CTxDestination PerformanceScript = DecodeDestination("sys1qchfrggux8tq8ns8z5qy74ete2a6tceekau9scmk4rtv7tlzetx4qlf9z9f");
         if (!IsValidDestination(PerformanceScript)) 
-            throw std::runtime_error("Error: Invalid PreMiner payout address");
+            throw std::runtime_error("Error: Invalid performance payout address");
         const CScript PerformancePubKey = GetScriptForDestination(PerformanceScript);
         CTxOut PerformanceReward;
         PerformanceReward.scriptPubKey = PerformancePubKey;
-        // std::string strPerformanceReward = FormatMoney(blockReward * 0.8 +  nHalfFee);
-        // std::stoll(strPerformanceReward);
-        PerformanceReward.nValue = blockReward * 0.8 +  nHalfFee;
+        CAmount PerformanceCoin = (blockReward * Params().GetPerformancePercent()) / 100;
+        PerformanceReward.nValue = PerformanceCoin + nHalfFee;
+        // PerformanceReward.nValue = blockReward * 0.8 +  nHalfFee;
         txNew.vout.push_back(PerformanceReward);
     }
     
@@ -335,16 +350,12 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
 
     // ... and masternode
     txoutMasternodeRet = CTxOut(blockReward, payee);
-    // std::string strHalfFee = FormatMoney(nHalfFee);         //modify by lkz
-	// txoutMasternodeRet.nValue += std::stoll(strHalfFee);    //modify by lkz
     txoutMasternodeRet.nValue += nHalfFee;
 
     txNew.vout.push_back(txoutMasternodeRet);
 
     CTxDestination address1;
     ExtractDestination(payee, address1);
-
-
     LogPrint(BCLog::MNPAYMENT, "CMasternodePayments::FillBlockPayee -- Masternode payment %lld to %s\n", blockReward, EncodeDestination(address1));
 }
 
@@ -642,9 +653,9 @@ bool CMasternodeBlockPayees::IsTransactionValid(const CTransaction& txNew, const
 {
     LOCK(cs_vecPayees);
 
-    // modify by lkz
+    // modify by luke
     // const CAmount& nHalfFee = fee / 2;
-    int nVout = txNew.vout.size();
+    int nVout = txNew.vout.size() - 1;
 	const CAmount& nHalfFee = fee / nVout;
 
     int nMaxSignatures = 0;

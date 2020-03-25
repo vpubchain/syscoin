@@ -210,8 +210,6 @@ public:
         assert(consensus.hashGenesisBlock == uint256S("0x00000f8e6fec4ad5253c553720594f22708c4fe21600d71e9e9ad280ceb460b0"));
         assert(genesis.hashMerkleRoot == uint256S("0xdab4be98682322d9d9013828924be98e85c57852356a4d0207d87755af064e1d"));
 
-        // vSeeds.emplace_back("seed1.syscoin.org");
-        // vSeeds.emplace_back("seed2.syscoin.org");
         vSeeds.emplace_back("47.105.157.227");
         vSeeds.emplace_back("118.190.201.80");
         
@@ -230,6 +228,19 @@ public:
         strSporkAddress = "SSZvS59ddqG87koeUPu1J8ivg5yJsQiWGN";    
         nFulfilledRequestExpireTime = 60*60; // fulfilled requests expire in 1 hour
         m_is_test_chain = false;
+
+        //add by luke
+        //Performance Fund
+        strPerformanceAddr = "sys1qchfrggux8tq8ns8z5qy74ete2a6tceekau9scmk4rtv7tlzetx4qlf9z9f";
+        nPerformancePercent = 80;
+        
+        // Note:Community funds and technology funds are different sources of funding from performance funds
+        //Community Fund
+        strCommunityAddr   = "sys1qt365atvnmjtp3cq8qstt3latv4ntahpln0hd609r60rygzftgvhshvg3wj";
+        nCommunityPercent = 80;
+        //Technology Fund
+        strTechnologyAddr  = "sys1qvxpzc859n90ud7pegca73f2nj80alavdq6mke0qmsap4awvt2lsszx3vpf";  
+        nTechnologyPercent = 100 - nCommunityPercent;
 
         checkpointData = {
             {

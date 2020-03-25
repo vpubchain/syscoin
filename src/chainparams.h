@@ -89,6 +89,16 @@ public:
     void SetSYSXAssetForUnitTests(uint32_t asset);
     int FulfilledRequestExpireTime() const { return nFulfilledRequestExpireTime; }
     const std::string& SporkAddress() const { return strSporkAddress; }
+
+    //add by luke
+    const std::string& GetPerformanceAddr() const { return strPerformanceAddr; }
+    const std::string& GetCommunityAddr() const { return strCommunityAddr; }
+    const std::string& GetTechnologyAddr() const { return strTechnologyAddr; }
+
+    int GetPerformancePercent() const { return nPerformancePercent; }
+    int GetCommunityPercent() const { return nCommunityPercent; }
+    int GetTechnologyPercent() const { return nTechnologyPercent; }
+
 protected:
     CChainParams() {}
 
@@ -112,6 +122,15 @@ protected:
     // SYSCOIN
     int nFulfilledRequestExpireTime;
     std::string strSporkAddress;   
+
+    //add by luke
+    std::string strPerformanceAddr;
+    std::string strCommunityAddr;
+    std::string strTechnologyAddr;
+
+    int nPerformancePercent;
+    int nCommunityPercent;
+    int nTechnologyPercent;
 };
 
 /**
