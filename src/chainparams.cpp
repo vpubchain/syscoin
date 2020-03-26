@@ -134,7 +134,7 @@ class CMainParams : public CChainParams {
 public:
     CMainParams() {
         strNetworkID = CBaseChainParams::MAIN;
-        consensus.nSubsidyHalvingInterval = 525600; 
+        consensus.nSubsidyHalvingInterval = 100; 
         // 35% increase after 1 year, 100% increase after 2.5 years
         consensus.nSeniorityHeight1 = 525600; 
         consensus.nSeniorityLevel1 = 0.35;
@@ -210,8 +210,8 @@ public:
         assert(consensus.hashGenesisBlock == uint256S("0x00000f8e6fec4ad5253c553720594f22708c4fe21600d71e9e9ad280ceb460b0"));
         assert(genesis.hashMerkleRoot == uint256S("0xdab4be98682322d9d9013828924be98e85c57852356a4d0207d87755af064e1d"));
 
-        vSeeds.emplace_back("47.105.157.227");
-        vSeeds.emplace_back("118.190.201.80");
+        // vSeeds.emplace_back("47.105.157.227");
+        // vSeeds.emplace_back("118.190.201.80");
         
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,63);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,5);
