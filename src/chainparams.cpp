@@ -237,7 +237,7 @@ public:
         // Note:Community funds and technology funds are different sources of funding from performance funds
         //Community Fund
         strCommunityAddr   = "sys1qt365atvnmjtp3cq8qstt3latv4ntahpln0hd609r60rygzftgvhshvg3wj";
-        nCommunityPercent = 80;
+        nCommunityPercent = 79;
         //Technology Fund
         strTechnologyAddr  = "sys1qvxpzc859n90ud7pegca73f2nj80alavdq6mke0qmsap4awvt2lsszx3vpf";  
         nTechnologyPercent = 100 - nCommunityPercent;

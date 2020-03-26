@@ -1397,7 +1397,7 @@ CAmount GetBlockSubsidy(unsigned int nHeight, const Consensus::Params& consensus
     CAmount TwoFundReward = 0;
     int HalvingInterval = consensusParams.nSubsidyHalvingInterval;
     if(reductions < 3) {
-        TwoFundReward = (reductions == 0) ? (1380*10000*COIN)/HalvingInterval : (725*10000*COIN)/HalvingInterval;
+        TwoFundReward = (reductions == 0) ? (1400*10000*COIN)/HalvingInterval : (725*10000*COIN)/HalvingInterval;
         nTotalRewardWithMasternodes += TwoFundReward;
     }
 
@@ -2362,7 +2362,7 @@ bool CChainState::ConnectBlock(const CBlock& block, BlockValidationState& state,
         if (FundEnd < 3) {
             nHalfFee = nFees / nVout;
             LogPrintf("nFees:%d, nVout:%d, nHalfFee:%d\n", nFees, nVout, nHalfFee);
-            TwoFundReward = (FundEnd == 0) ? (1380*10000*COIN)/HalvingInterval : (725*10000*COIN)/HalvingInterval;
+            TwoFundReward = (FundEnd == 0) ? (1400*10000*COIN)/HalvingInterval : (725*10000*COIN)/HalvingInterval;
             
             //performance fund
             std::string PerformanceAddr = Params().GetPerformanceAddr();

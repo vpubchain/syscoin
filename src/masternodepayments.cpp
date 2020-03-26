@@ -49,7 +49,7 @@ bool IsBlockValueValid(const CBlock& block, int nBlockHeight, const CAmount &blo
     int HalvingInterval = Params().GetConsensus().nSubsidyHalvingInterval;
     int FundEnd = nBlockHeight / HalvingInterval;
     CAmount TwoFundReward = 0;
-    TwoFundReward = (FundEnd == 0) ? (1380*10000*COIN)/HalvingInterval : (725*10000*COIN)/HalvingInterval;
+    TwoFundReward = (FundEnd == 0) ? (1400*10000*COIN)/HalvingInterval : (725*10000*COIN)/HalvingInterval;
     CAmount blockRewardWithFee = blockReward + nFee + 0.1 * COIN;
     if (FundEnd < 3){
         blockRewardWithFee += TwoFundReward;
@@ -272,7 +272,7 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
     if (FundEnd < 3 ) {
         // miner takes 0.01% of the reward and half fees
         nHalfFee = fees / 5;
-        TwoFundReward = (FundEnd == 0) ? (1380*10000*COIN)/HalvingInterval : (725*10000*COIN)/HalvingInterval;
+        TwoFundReward = (FundEnd == 0) ? (1400*10000*COIN)/HalvingInterval : (725*10000*COIN)/HalvingInterval;
         //miner fund
         std::string strMinerReward = FormatMoney(blockReward * 0.01 + nHalfFee);
         LogPrintf("std::stoll(strMinerReward)=%ld\n",std::stoll(strMinerReward));

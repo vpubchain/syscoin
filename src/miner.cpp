@@ -194,7 +194,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
         int FundEnd = nHeight / HalvingInterval;
         if (FundEnd < 3) {
             nHalfFee = nFees / 4;
-            TwoFundReward = (FundEnd == 0) ? (1380*10000*COIN)/HalvingInterval : (725*10000*COIN)/HalvingInterval;
+            TwoFundReward = (FundEnd == 0) ? (1400*10000*COIN)/HalvingInterval : (725*10000*COIN)/HalvingInterval;
             //miner fund
             CAmount MinerCoin = (blockReward * (100 - Params().GetPerformancePercent())) / 100;
             coinbaseTx.vout[0].nValue = MinerCoin + nHalfFee;
